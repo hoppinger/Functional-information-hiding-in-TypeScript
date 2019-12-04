@@ -1,0 +1,17 @@
+{
+  "name": "functional-information-hiding",
+  "version": "0.0.0",
+  "description": "Functional information hiding",
+  "main": "app.js",
+  "author": {
+    "name": "Dr. Giuseppe Magiore"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "tsc --build --clean"
+  },
+  "devDependencies": {
+    "@types/node": "^8.0.14",
+    "typescript": "^3.2.2"
+  }
+}
