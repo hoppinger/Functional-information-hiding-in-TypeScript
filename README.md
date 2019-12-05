@@ -79,9 +79,11 @@ const s3 = v2.toString()
 
 would indeed result in the following values\:
 
-`s1` | "(5, 3)"
-`s2` | "(2, 3)"
-`s3` | "(0.5547001962252291, 0.8320502943378437)"
+| Variable      | Val           |
+| ------------- | -------------:|
+| `s1`          | "(5, 3)" |
+| `s2`          | "(2, 3)" |
+| `s3`          | "(0.5547, 0.8321)" |
 
 just as expected.
 
@@ -265,7 +267,7 @@ export const FromArray = <a>(x: Array<a>): IStream<a> => {
 
 We do the same for `Where` and `Map` as well. Thankfully the compiler will guide us along this process by signaling that the implementations of `Where` and `Map` are missing the new methods, so we cannot really miss the issue.
 
-Et voilá\: we can now invoke the various methods in a "linear" format that makes reading easier\:
+Et voilÃ¡\: we can now invoke the various methods in a "linear" format that makes reading easier\:
 
 ```ts
 let numbers = FromArray([1, 2, 3, 4, 5, 6])
@@ -275,3 +277,93 @@ let numbers = FromArray([1, 2, 3, 4, 5, 6])
 ```
 
 The full listing for this basic stream library can be found [here](streams.ts).
+
+
+### Advanced typing and streams
+We can extend our streams library with some advanced typing, in order to do something that is (currently) impossible to guarantee statically (thus at compile\-time) with languages such as C\# and Java. We want to be able to define SQL-style selector operations where the compiler guarantees that we are not trying to select a field that does not exist, and where the resulting type is generated for us by the compiler.
+
+> Note that this feature can be partially implemented by C\# language functionality such as anonymous types. This said, anonymous types are very limited, and are an "isolated" area of the typesystem of the language. The functionality that we will use in the following is much more general than its C\# cousin, and as such we suffer from no restrictions such as "anonymous types cannot be returned by a function".
+
+Let us define a new method, `Select`, in the `IStream` interface. We want to specify that we can only select fields of the elements of the stream. We do this by stating that the parameter of `Select` must be an array of `key` values, where `key` is a generic argument that must respect the generic constraint ` key extends keyof a
+`, that is `key` is the type of one or more fields of `a`.
+
+```ts
+  readonly Select : <key extends keyof a>(...keys: key[]) => IStream<Pick<a, key>>
+```
+
+The implementation of `Select` is essentially the very same implementation of `Map`, but instead of invoking the transformation function for each element, we extract the `key` values into a new result\:
+
+```ts
+const Select = <a, key extends keyof a>(stream: IStream<a>, ...keys: key[]) => {
+  return {
+    Enumerate: () => {
+      let enumerator = stream.Enumerate()
+      return {
+        Reset: () => enumerator.Reset(),
+        MoveNext: () => {
+          let current = enumerator.MoveNext()
+          let result: any = {}
+          if (current == undefined) return undefined
+          for (let i = 0; i < keys.length; i++) result[keys[i]] = current[keys[i]]
+          return result as Pick<a,key>
+        }
+      }
+    },
+    ...methods<a>()
+  }  
+}
+```
+
+> Unfortunately, TypeScript requires one last cast of the result to `Pick<a,key>` in order to understand that the program might compile. Hopefully we will get to a better and better type system that does not require even such a minor hack at some point, but one should appreciate the intelligence of TypeScript's type system already!
+
+We can now use the new operator as follows\:
+
+```ts
+let people = FromArray([
+  { name: "John", surname: "Doe", age:27 },
+  { name: "Jane", surname: "Red", age: 11 },
+  { name: "Jill", surname: "Miller", age: 39 },
+  { name: "Rick", surname: "Muller", age: 72 },
+  { name: "Ross", surname: "Franken", age: 57 },
+  { name: "Rose", surname: "Rossi", age: 35 },
+  { name: "Gwen", surname: "Antonio", age: 21 }])
+  .Select("name", "surname")
+  .ToArray()
+```
+
+The type of the result will be\:
+
+```ts
+people:Array<{ name:string, surname:string }>
+```
+
+while the value of the result will be\:
+
+```ts
+[{name: "John", surname: "Doe"}
+ {name: "Jane", surname: "Red"}
+ {name: "Jill", surname: "Miller"}
+ {name: "Rick", surname: "Muller"}
+ {name: "Ross", surname: "Franken"}
+ {name: "Rose", surname: "Rossi"}
+ {name: "Gwen", surname: "Antonio"}]
+```
+
+Exactly as expected. We could further perform operations such a:
+
+```ts
+let people = FromArray([
+  { name: "John", surname: "Doe", age:27 },
+  { name: "Jane", surname: "Red", age: 11 },
+  { name: "Jill", surname: "Miller", age: 39 },
+  { name: "Rick", surname: "Muller", age: 72 },
+  { name: "Ross", surname: "Franken", age: 57 },
+  { name: "Rose", surname: "Rossi", age: 35 },
+  { name: "Gwen", surname: "Antonio", age: 21 }])
+  .Select("age")
+  .ToArray()
+```
+
+which, as expected, would extract the array of ages. It is nice to notice that Visual Studio can offer us auto\-completion thanks to the type definitions, as seen in the following screenshot\:
+
+![typed streams intellisense](pics/typed-streams-intellisense.bmp)
