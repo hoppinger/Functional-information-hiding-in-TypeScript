@@ -338,3 +338,7 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+
+node_modules/**/*.*
+**/*.js.map
+**/*.js
