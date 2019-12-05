@@ -3,12 +3,14 @@ type Fun<a,b> = (_:a) => b
 export type IStream<a> = {
   readonly Enumerate: () => IEnumerator<a>
   readonly ToArray: () => Array<a>
-  readonly Where: (predicate:Fun<a, Boolean>) => IStream<a>
+  readonly Where: (predicate: Fun<a, Boolean>) => IStream<a>
+  readonly Map: <b> (f: Fun<a, b>) => IStream<b>
 }
 
 const methods = <a>() => ({
   ToArray: function (this: IStream<a>) { return ToArray(this) },
-  Where: function (this: IStream<a>, predicate: Fun<a, Boolean>) { return Where(this, predicate) }
+  Where: function (this: IStream<a>, predicate: Fun<a, Boolean>) { return Where(this, predicate) },
+  Map: function <b>(this: IStream<a>, f: Fun<a, b>) { return Map(this, f) }
 })
 
 export type IEnumerator<a> = {
@@ -51,6 +53,22 @@ export const Infinite = <a>(getItem: Fun<number, a>): IStream<a> => {
   }
 }
 
+export const Map = <a, b>(stream: IStream<a>, f: Fun<a, b>): IStream<b> => {
+  return {
+    Enumerate: () => {
+      let enumerator = stream.Enumerate()
+      return {
+        Reset: () => enumerator.Reset(),
+        MoveNext: () => {
+          let current = enumerator.MoveNext()          
+          return current ? f(current) : undefined
+        }
+      }
+    },
+    ...methods()
+  }
+}
+
 export const Where = <a>(stream: IStream<a>, predicate: Fun<a, Boolean>): IStream<a> => {
   return {
     Enumerate: () => {
@@ -71,6 +89,7 @@ export const Where = <a>(stream: IStream<a>, predicate: Fun<a, Boolean>): IStrea
 
 let numbers = FromArray([1, 2, 3, 4, 5, 6])
   .Where(x => x % 2 == 0)
+  .Map(x => x * 3)
   .ToArray()
 
 console.log("done")
