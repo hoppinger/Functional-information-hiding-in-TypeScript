@@ -11,7 +11,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>ec32cd3c-43d3-41e1-9ba2-5ba220ab3d48</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>vector2.ts</StartupFile>
+    <StartupFile>streams.ts</StartupFile>
     <StartWebBrowser>False</StartWebBrowser>
     <SearchPath>
     </SearchPath>
