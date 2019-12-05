@@ -366,4 +366,15 @@ let people = FromArray([
 
 which, as expected, would extract the array of ages. It is nice to notice that Visual Studio can offer us auto\-completion thanks to the type definitions, as seen in the following screenshot\:
 
-![typed streams intellisense](pics/typed-streams-intellisense.bmp)
+![typed streams intellisense](pics/typed-streams-intellisense.bmp =250)
+
+# Conclusion
+In this article we have seen how to implement the definition of object-oriented constructs into functional programming in TypeScript.
+We have seen that we can combine these functional constructs with advanced types in TypeScript, thereby obtaining very precise types around our classes and interfaces.
+
+This exercise is useful from a special perspective in my opinion. There is always something to discover ("make things as simple as they can be, but no simpler") when challenging language constructs such as objects, classes, and inheritance by implementing them through simpler constructs such as records and functions. By decomposing a more complex construct and rebuilding it with simpler tools we attain a deeper understanding and more control: nobody stops us now from defining classes where the methods themselves can be "hot-swapped" at run-time, or even go crazier with new variations of polymorphism that do not fully conform to the traditional wisdom around object orientation.
+
+# About the author
+Giuseppe Maggiore holds a PhD in Computer Science and is now currently lecturer in Computer Science at the University of Applied Sciences in Rotterdam, CTO of Hoppinger (digital transformation partner), and co-owner of Vidda Digital (fullservice webdevelopment agency).
+
+If you like this way of programming, and would like to get to know (or even [work with](https://www.hoppinger.com/vacatures/)!) more like-minded people, do not hesitate [get in touch](https://www.hoppinger.com/contact/) with us.
