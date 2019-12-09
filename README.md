@@ -53,6 +53,8 @@ Now we can create the actual instance of the interface:
 
 Notice that the `fields` variable is available inside the various methods, even though it was declared as a local variable inside the `Vector2` constructor function. Normally, local variables cease to exist after the function in which they are declared returns a value (their _stack frame_ gets cleaned up). An exception to this behaviour is that extra functions are created that keep making use of the local variables of the parent _scope_. In this case, these variables that are captured in the so\-called _closure_ of the inner function, will not be cleaned up when the main function returns. Thus, functions such as `getX` and `setX` cause `fields` to not be cleaned up. Moreover, `fields` will act as a permanent storage to which only an instance of `Vector2` can access, but after the function `Vector2` returns, all other references to `fields` will be lost. This makes the content of `fields` effectively *private*.
 
+> Notice that we could have opted for a more standard, immutable definition of `IVector2`. I have chosen not to do this on purpose, in order to show how to build a mutable class with the approach being discussed. This said, I would personally both prefer and advise to stick to immutable classes whenever possible.
+
 Using the `Vector2` class is quite simple. We first initialise a new instance of `Vector2` by simply invoking the `Vector2` class, which thus effectively becomes a *constructor*\:
 
 ```ts
@@ -114,12 +116,15 @@ We can now define the first concrete stream: an array stream. Following the same
 
 ```ts
 export const FromArray = <a>(x: Array<a>): IStream<a> => {
-  let fields = { index: 0 }
   return {
-    Enumerate: () => ({
-      Reset: () => fields.index = 0,
-      MoveNext: () => x.length <= fields.index ? undefined : x[fields.index++]
-    })
+    Enumerate: () => {
+      let fields = { index: 0 }
+      return {
+        Reset: () => fields.index = 0,
+        MoveNext: () => x.length <= fields.index ? undefined : x[fields.index++]
+      }
+    },
+    ...methods()
   }
 }
 ```
@@ -136,12 +141,15 @@ We can also define infinite streams that generate the elements on the fly based 
 
 ```ts
 export const Infinite = <a>(getItem: Fun<number, a>): IStream<a> => {
-  let fields = { index: 0 }
   return {
-    Enumerate: () => ({
-      Reset: () => fields.index = 0,
-      MoveNext: () => getItem(fields.index++)
-    })
+    Enumerate: () => {
+      let fields = { index: 0 }
+      return {
+        Reset: () => fields.index = 0,
+        MoveNext: () => getItem(fields.index++)
+      }
+    },
+    ...methods()
   }
 }
 ```

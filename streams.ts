@@ -45,12 +45,14 @@ export const FromArray = <a>(x: Array<a>): IStream<a> => {
 export const Singleton = <a>(x: a): IStream<a> => FromArray([x])
 
 export const Infinite = <a>(getItem: Fun<number, a>): IStream<a> => {
-  let fields = { index: 0 }
   return {
-    Enumerate: () => ({
-      Reset: () => fields.index = 0,
-      MoveNext: () => getItem(fields.index++)
-    }),
+    Enumerate: () => {
+      let fields = { index: 0 }
+      return {
+        Reset: () => fields.index = 0,
+        MoveNext: () => getItem(fields.index++)
+      }
+    },
     ...methods()
   }
 }
