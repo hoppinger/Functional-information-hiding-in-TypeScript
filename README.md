@@ -25,7 +25,7 @@ type IVector2 = {
 We now move on to the implementation itself. The implementation is actually hidden behind a single function which acts as the equivalent of a constructor:
 
 ```ts
-const Vector2 = (x: number, y: number): IVector2 => {
+const Vector2 = (x: number, y: number): IVector2 =>
 ```
 
 The constructor takes as input the parameters for the vector, which are `x` and `y` (both numbers), and returns an instance of `IVector2` around these parameters.
@@ -291,6 +291,9 @@ Let us define a new method, `Select`, in the `IStream` interface. We want to spe
   readonly Select : <key extends keyof a>(...keys: key[]) => IStream<Pick<a, key>>
 ```
 
+> `Pick<t, k>` is a standard library type that selects only the keys `k` from `t`. For example, `Pick<{ x: number, y: string, z: boolean }, "x" | "z"> = { x: number, z: boolean }`.
+> Notice that, while `Pick` is very handy, it can also be defined with advanced type combinators directly, so it is not a builtin primitive!
+
 The implementation of `Select` is essentially the very same implementation of `Map`, but instead of invoking the transformation function for each element, we extract the `key` values into a new result\:
 
 ```ts
@@ -366,7 +369,7 @@ let people = FromArray([
 
 which, as expected, would extract the array of ages. It is nice to notice that Visual Studio can offer us auto\-completion thanks to the type definitions, as seen in the following screenshot\:
 
-![typed streams intellisense](pics/typed-streams-intellisense.bmp =250)
+![typed streams intellisense](pics/typed-streams-intellisense.bmp)
 
 # Conclusion
 In this article we have seen how to implement the definition of object-oriented constructs into functional programming in TypeScript.

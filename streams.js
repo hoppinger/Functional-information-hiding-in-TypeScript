@@ -16,11 +16,13 @@ exports.ToArray = (stream) => {
     return result;
 };
 exports.FromArray = (x) => {
-    let fields = { index: 0 };
-    return Object.assign({ Enumerate: () => ({
-            Reset: () => fields.index = 0,
-            MoveNext: () => x.length <= fields.index ? undefined : x[fields.index++]
-        }) }, methods());
+    return Object.assign({ Enumerate: () => {
+            let fields = { index: 0 };
+            return {
+                Reset: () => fields.index = 0,
+                MoveNext: () => x.length <= fields.index ? undefined : x[fields.index++]
+            };
+        } }, methods());
 };
 exports.Singleton = (x) => exports.FromArray([x]);
 exports.Infinite = (getItem) => {
@@ -56,9 +58,12 @@ exports.Where = (stream, predicate) => {
             };
         } }, methods());
 };
-let numbers = exports.FromArray([1, 2, 3, 4, 5, 6])
+let source = exports.FromArray([1, 2, 3, 4, 5, 6]);
+let numbers = source
     .Where(x => x % 2 == 0)
     .Map(x => x * 3)
+    .ToArray();
+let numbers2 = source
     .ToArray();
 console.log("done");
 //# sourceMappingURL=streams.js.map

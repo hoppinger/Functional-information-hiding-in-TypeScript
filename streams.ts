@@ -30,12 +30,14 @@ export const ToArray = <a>(stream: IStream<a>): Array<a> => {
 }
 
 export const FromArray = <a>(x: Array<a>): IStream<a> => {
-  let fields = { index: 0 }
   return {
-    Enumerate: () => ({
-      Reset: () => fields.index = 0,
-      MoveNext: () => x.length <= fields.index ? undefined : x[fields.index++]
-    }),
+    Enumerate: () => {
+      let fields = { index: 0 }
+      return {
+        Reset: () => fields.index = 0,
+        MoveNext: () => x.length <= fields.index ? undefined : x[fields.index++]
+      }
+    },
     ...methods()
   }
 }
@@ -87,9 +89,14 @@ export const Where = <a>(stream: IStream<a>, predicate: Fun<a, Boolean>): IStrea
   }
 }
 
-let numbers = FromArray([1, 2, 3, 4, 5, 6])
+let source = FromArray([1, 2, 3, 4, 5, 6])
+
+let numbers = source
   .Where(x => x % 2 == 0)
   .Map(x => x * 3)
+  .ToArray()
+
+let numbers2 = source
   .ToArray()
 
 console.log("done")
